@@ -26,8 +26,7 @@ modules:
       - ln -sf smtube-dir/src smtube
       - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
       - cp smtube/translations/*.qm src/translations/
-      - make PREFIX=/app QMAKE_OPTS="DEFINES+=NO_DEBUG_ON_CONSOLE DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS
-      - make PREFIX=/app QMAKE_OPTS="DEFINES+=NO_DEBUG_ON_CONSOLE DEFINES+=USE_SMTUBE_LIB" install
+      - make PREFIX=/app QMAKE_OPTS="DEFINES+=NO_DEBUG_ON_CONSOLE DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS install
       - mkdir -p /app/share/icons/hicolor/scalable/apps/
       - install -Dm644 icons/smplayer.svg
              /app/share/icons/hicolor/scalable/apps/info.smplayer.SMPlayer.svg
