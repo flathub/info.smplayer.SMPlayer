@@ -1,8 +1,8 @@
 app-id: info.smplayer.SMPlayer
 base: io.qt.qtwebkit.BaseApp
-base-version: '5.15'
+base-version: '5.12'
 runtime: org.kde.Platform
-runtime-version: '5.15'
+runtime-version: '5.12'
 sdk: org.kde.Sdk
 rename-desktop-file: smplayer.desktop
 command: smplayer
@@ -26,7 +26,7 @@ modules:
       - ln -sf smtube-dir/src smtube
       - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
       - cp smtube/translations/*.qm src/translations/
-      - make PREFIX=/app QMAKE_OPTS="DEFINES+=NO_DEBUG_ON_CONSOLE DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS install
+      - make PREFIX=/app QMAKE_OPTS="DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS install
       - mkdir -p /app/share/icons/hicolor/scalable/apps/
       - install -Dm644 icons/smplayer.svg
              /app/share/icons/hicolor/scalable/apps/info.smplayer.SMPlayer.svg
@@ -34,15 +34,27 @@ modules:
              /app/share/applications/smplayer.desktop
       - mv /app/share/metainfo/smplayer.appdata.xml /app/share/metainfo/info.smplayer.SMPlayer.appdata.xml
     sources:
-      - type: archive
-        url: https://github.com/smplayer-dev/smplayer/releases/download/v21.8.0/smplayer-21.8.0.tar.bz2
-        sha256: 'c5bcdb175303baf590eaa91163043f23cfab1901ac15e7da24b4d674f1822163'
-      - type: archive
-        url: https://github.com/smplayer-dev/smtube/releases/download/v21.7.0/smtube-21.7.0.tar.bz2
-        sha256: '77e47778cd813ddaec63b5d7fba216a73e9c288cbf2f6c7488b647d264e07dc7'
+      - type: git
+        url: https://github.com/smplayer-dev/smplayer.git
+        tag: v21.10.0
+        commit: ff80969eae6d033ec9b6a95ff1776fc890fbc388
+        disable-shallow-clone: true
+      - type: git
+        url: https://github.com/smplayer-dev/smtube.git
+        tag: v21.10.0
+        commit: aecd6668b6e3114eec4da7b14fd933c46f1f27af
         dest: smtube-dir
 
     modules:
+      - name: qt-translations
+        buildsystem: simple
+        build-commands:
+          - mkdir -p /app/share/smplayer/translations
+          - tar xf qt512-translations.tar.bz2 -C /app/share/smplayer/translations
+        sources:
+          - type: file
+            path: qt512-translations.tar.bz2
+
       - name: mpv
         cleanup:
           - /include
@@ -50,9 +62,7 @@ modules:
           - /share/man
         buildsystem: simple
         build-commands:
-          - python3 waf configure --prefix=/app
-                                  --enable-libarchive
-                                  --enable-gl-x11
+          - python3 waf configure --prefix=/app --enable-gl-x11
           - python3 waf build
           - python3 waf install
         sources:
@@ -107,8 +117,8 @@ modules:
               - '--disable-encoders'
               - '--disable-muxers'
               - '--enable-encoder=png,libwebp'
-              - '--enable-libv4l2'
-              - '--enable-libdav1d'
+              #- '--enable-libv4l2'
+              #- '--enable-libdav1d'
               - '--enable-libfontconfig'
               - '--enable-libfreetype'
               - '--enable-libopus'
