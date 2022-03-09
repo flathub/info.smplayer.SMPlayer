@@ -36,8 +36,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/smplayer-dev/smplayer.git
-        tag: v21.10.0
-        commit: ff80969eae6d033ec9b6a95ff1776fc890fbc388
+        tag: v22.2.0
+        commit: bad37f395cc8d1bcc80978bfdad36a8efb3d0cf5
         disable-shallow-clone: true
       - type: git
         url: https://github.com/smplayer-dev/smtube.git
@@ -67,8 +67,8 @@ modules:
           - python3 waf install
         sources:
           - type: archive
-            url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.33.1.tar.gz
-            sha256: '100a116b9f23bdcda3a596e9f26be3a69f166a4f1d00910d1789b6571c46f3a9'
+            url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.34.1.tar.gz
+            sha256: '32ded8c13b6398310fa27767378193dc1db6d78b006b70dbcbd3123a1445e746'
           - type: file
             url: 'https://waf.io/waf-2.0.21'
             sha256: '7cebf2c5efe53cbb9a4b5bdc4b49ae90ecd64a8fce7a3222d58e591b58215306'
