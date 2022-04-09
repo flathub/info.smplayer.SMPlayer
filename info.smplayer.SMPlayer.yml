@@ -1,10 +1,12 @@
 app-id: info.smplayer.SMPlayer
 base: io.qt.qtwebkit.BaseApp
-base-version: '5.12'
+base-version: '5.15-21.08'
 runtime: org.kde.Platform
-runtime-version: '5.12'
+runtime-version: '5.15-21.08'
 sdk: org.kde.Sdk
 rename-desktop-file: smplayer.desktop
+rename-appdata-file: smplayer.appdata.xml
+rename-icon: smplayer
 command: smplayer
 finish-args:
   - '--share=ipc'
@@ -27,12 +29,7 @@ modules:
       - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
       - cp smtube/translations/*.qm src/translations/
       - make PREFIX=/app QMAKE_OPTS="DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS install
-      - mkdir -p /app/share/icons/hicolor/scalable/apps/
-      - install -Dm644 icons/smplayer.svg
-             /app/share/icons/hicolor/scalable/apps/info.smplayer.SMPlayer.svg
-      - desktop-file-edit --set-icon=info.smplayer.SMPlayer
-             /app/share/applications/smplayer.desktop
-      - mv /app/share/metainfo/smplayer.appdata.xml /app/share/metainfo/info.smplayer.SMPlayer.appdata.xml
+      - install -Dm644 icons/smplayer.svg /app/share/icons/hicolor/scalable/apps/smplayer.svg
     sources:
       - type: git
         url: https://github.com/smplayer-dev/smplayer.git
@@ -128,8 +125,8 @@ modules:
               - '--enable-libwebp'
             sources:
               - type: archive
-                url: 'https://ffmpeg.org/releases/ffmpeg-4.4.tar.xz'
-                sha256: '06b10a183ce5371f915c6bb15b7b1fffbe046e8275099c96affc29e17645d909'
+                url: https://ffmpeg.org/releases/ffmpeg-4.4.1.tar.xz
+                sha256: eadbad9e9ab30b25f5520fbfde99fae4a92a1ae3c0257a8d68569a4651e30e02
 
           - name: libass
             cleanup:
@@ -171,22 +168,18 @@ modules:
                 sha256: 6a64f2a687f5c4f203a46fa659f43dd43d1f8b845df8d723107e8a7e6158e4ce
 
       - name: mplayer
-        buildsystem: simple
+        buildsystem: autotools
         build-options:
           arch:
             x86_64:
-              env:
-                ENABLE_RUNTIME_CPUDETECTION: --enable-runtime-cpudetection
-        build-commands:
-          - ./configure --prefix=/app
-                        --disable-libmpeg2-internal
-                        --disable-ffmpeg_a
-                        --disable-gui
-                        --disable-mencoder
-                        --yasm=''
-                        $ENABLE_RUNTIME_CPUDETECTION
-          - make -j$FLATPAK_BUILDER_N_JOBS
-          - make install
+              config-opts:
+                - --enable-runtime-cpudetection
+        config-opts:
+          - --disable-libmpeg2-internal
+          - --disable-ffmpeg_a
+          - --disable-gui
+          - --disable-mencoder
+          - --yasm=
         sources:
           - type: archive
             url: http://www.mplayerhq.hu/MPlayer/releases/MPlayer-1.4.tar.xz
