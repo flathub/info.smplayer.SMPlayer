@@ -33,8 +33,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/smplayer-dev/smplayer.git
-        tag: v22.2.0
-        commit: bad37f395cc8d1bcc80978bfdad36a8efb3d0cf5
+        tag: v22.7.0
+        commit: 06363d7f3573dc4fc2159424ea9f4b80976ed123
         disable-shallow-clone: true
       - type: git
         url: https://github.com/smplayer-dev/smtube.git
