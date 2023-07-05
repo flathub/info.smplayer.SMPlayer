@@ -24,8 +24,14 @@ modules:
     build-options:
       env:
         QMAKEPATH: /app/lib
-        #QDEFOPTS: "DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB"
-        QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_SMTUBE_LIB
+      arch:
+        x86_64:
+          env:
+            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB
+      arch:
+        aarch64:
+          env:
+            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_SMTUBE_LIB
     build-commands:
       - ln -sf smtube-dir/src smtube
       - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
