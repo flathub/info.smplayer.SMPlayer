@@ -28,7 +28,6 @@ modules:
         x86_64:
           env:
             QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB
-      arch:
         aarch64:
           env:
             QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_SMTUBE_LIB
