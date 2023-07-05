@@ -24,11 +24,13 @@ modules:
     build-options:
       env:
         QMAKEPATH: /app/lib
+        #QMAKE_OPTS: "DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB"
+        QMAKE_OPTS: "DEFINES+=USE_SHM DEFINES+=USE_SMTUBE_LIB"
     build-commands:
       - ln -sf smtube-dir/src smtube
       - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
       - cp smtube/translations/*.qm src/translations/
-      - make PREFIX=/app QMAKE_OPTS="DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS install
+      - make PREFIX=/app QMAKE_OPTS=$QMAKE_OPTS -j$FLATPAK_BUILDER_N_JOBS install
       - install -Dm644 icons/smplayer.svg /app/share/icons/hicolor/scalable/apps/smplayer.svg
     sources:
       - type: git
