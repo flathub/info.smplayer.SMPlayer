@@ -24,17 +24,24 @@ modules:
     build-options:
       env:
         QMAKEPATH: /app/lib
+      arch:
+        x86_64:
+          env:
+            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB
+        aarch64:
+          env:
+            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_SMTUBE_LIB
     build-commands:
       - ln -sf smtube-dir/src smtube
       - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
       - cp smtube/translations/*.qm src/translations/
-      - make PREFIX=/app QMAKE_OPTS="DEFINES+=USE_SMTUBE_LIB" -j$FLATPAK_BUILDER_N_JOBS install
+      - make PREFIX=/app QMAKE_OPTS="$QDEFOPTS" -j$FLATPAK_BUILDER_N_JOBS install
       - install -Dm644 icons/smplayer.svg /app/share/icons/hicolor/scalable/apps/smplayer.svg
     sources:
       - type: git
         url: https://github.com/smplayer-dev/smplayer.git
-        tag: v22.7.0
-        commit: 06363d7f3573dc4fc2159424ea9f4b80976ed123
+        tag: v23.6.0
+        commit: aff9170c5f053ec493597f7e340475fdfb7b0b0e
         disable-shallow-clone: true
       - type: git
         url: https://github.com/smplayer-dev/smtube.git
@@ -43,15 +50,6 @@ modules:
         dest: smtube-dir
 
     modules:
-      - name: qt-translations
-        buildsystem: simple
-        build-commands:
-          - mkdir -p /app/share/smplayer/translations
-          - tar xf qt512-translations.tar.bz2 -C /app/share/smplayer/translations
-        sources:
-          - type: file
-            path: qt512-translations.tar.bz2
-
       - name: mpv
         cleanup:
           - /include
@@ -59,19 +57,30 @@ modules:
           - /share/man
         buildsystem: simple
         build-commands:
-          - python3 waf configure --prefix=/app --enable-gl-x11
+          - python3 waf configure --prefix=/app
+                                  --enable-libarchive
+                                  --enable-gl-x11
+                                  --disable-pipewire
           - python3 waf build
           - python3 waf install
         sources:
           - type: archive
-            url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.34.1.tar.gz
-            sha256: '32ded8c13b6398310fa27767378193dc1db6d78b006b70dbcbd3123a1445e746'
+            url: https://github.com/smplayer-dev/mpv/releases/download/v0.35.1-mod-2/mpv-mod-src-0.35.1.tar.gz
+            sha256: 'c211f0db98af0fcec72ce52ea983fcd7e12d69027ee43fd20191a798da40c6bc'
           - type: file
             url: 'https://waf.io/waf-2.0.21'
             sha256: '7cebf2c5efe53cbb9a4b5bdc4b49ae90ecd64a8fce7a3222d58e591b58215306'
             dest-filename: waf
 
         modules:
+          - name: libXpresent
+            buildsystem: autotools
+            sources:
+              - type: git
+                url: https://gitlab.freedesktop.org/xorg/lib/libxpresent.git
+                tag: libXpresent-1.0.1
+                commit: 37507b5f44332accfb1064ee69a4f6a833994747
+
           - name: luajit
             no-autogen: true
             cleanup:
@@ -114,8 +123,8 @@ modules:
               - '--disable-encoders'
               - '--disable-muxers'
               - '--enable-encoder=png,libwebp'
-              #- '--enable-libv4l2'
-              #- '--enable-libdav1d'
+              - '--enable-libv4l2'
+              - '--enable-libdav1d'
               - '--enable-libfontconfig'
               - '--enable-libfreetype'
               - '--enable-libopus'
@@ -125,8 +134,8 @@ modules:
               - '--enable-libwebp'
             sources:
               - type: archive
-                url: https://ffmpeg.org/releases/ffmpeg-4.4.1.tar.xz
-                sha256: eadbad9e9ab30b25f5520fbfde99fae4a92a1ae3c0257a8d68569a4651e30e02
+                url: 'https://ffmpeg.org/releases/ffmpeg-6.0.tar.xz'
+                sha256: '57be87c22d9b49c112b6d24bc67d42508660e6b718b3db89c44e47e289137082'
 
           - name: libass
             cleanup:
@@ -175,15 +184,15 @@ modules:
               config-opts:
                 - --enable-runtime-cpudetection
         config-opts:
-          - --disable-libmpeg2-internal
-          - --disable-ffmpeg_a
           - --disable-gui
           - --disable-mencoder
+          - --extra-libs-mplayer=-lrt
           - --yasm=
         sources:
-          - type: archive
-            url: http://www.mplayerhq.hu/MPlayer/releases/MPlayer-1.4.tar.xz
-            sha256: '82596ed558478d28248c7bc3828eb09e6948c099bbd76bb7ee745a0e3275b548'
+          - type: git
+            url: https://github.com/smplayer-dev/mplayer-mod.git
+            tag: v1.5-110
+            commit: ea47c72e2b91a0a42fd2723f075bd7adb43ec55a
 
       - name: smplayer-skins
         buildsystem: simple
