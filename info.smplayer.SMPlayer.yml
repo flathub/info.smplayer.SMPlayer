@@ -1,8 +1,8 @@
 app-id: info.smplayer.SMPlayer
 base: io.qt.qtwebkit.BaseApp
-base-version: '5.15-22.08'
+base-version: '5.15-23.08'
 runtime: org.kde.Platform
-runtime-version: '5.15-22.08'
+runtime-version: '5.15-23.08'
 sdk: org.kde.Sdk
 rename-desktop-file: smplayer.desktop
 rename-appdata-file: smplayer.appdata.xml
@@ -27,27 +27,19 @@ modules:
       arch:
         x86_64:
           env:
-            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=USE_SMTUBE_LIB
+            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_GL_WINDOW DEFINES+=NO_MPLAYER
         aarch64:
           env:
-            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=USE_SMTUBE_LIB
+            QDEFOPTS: DEFINES+=USE_SHM DEFINES+=NO_MPLAYER
     build-commands:
-      - ln -sf smtube-dir/src smtube
-      - cd smtube && lrelease smtube.pro && qmake DEFINES+="SMTUBE_LIB" && make -j$FLATPAK_BUILDER_N_JOBS
-      - cp smtube/translations/*.qm src/translations/
       - make PREFIX=/app QMAKE_OPTS="$QDEFOPTS" -j$FLATPAK_BUILDER_N_JOBS install
       - install -Dm644 icons/smplayer.svg /app/share/icons/hicolor/scalable/apps/smplayer.svg
     sources:
       - type: git
         url: https://github.com/smplayer-dev/smplayer.git
-        tag: v23.12.0
-        commit: 5d8a92d44bdc35b56366dac82779d100113ff53d
+        tag: v24.5.0
+        commit: dc37d6faef17b1892d30ab31ec1295ec09e803ea
         disable-shallow-clone: true
-      - type: git
-        url: https://github.com/smplayer-dev/smtube.git
-        tag: v21.10.0
-        commit: aecd6668b6e3114eec4da7b14fd933c46f1f27af
-        dest: smtube-dir
 
     modules:
       - name: mpv
@@ -64,9 +56,10 @@ modules:
           - python3 waf build
           - python3 waf install
         sources:
-          - type: archive
-            url: https://github.com/smplayer-dev/mpv/releases/download/v0.35.1-mod-2/mpv-mod-src-0.35.1.tar.gz
-            sha256: 'c211f0db98af0fcec72ce52ea983fcd7e12d69027ee43fd20191a798da40c6bc'
+          - type: git
+            url: 'https://github.com/smplayer-dev/mpv.git'
+            tag: v0.36.0
+            commit: ca9dd6d18b7832127a8158950c8c2c2138225e5e
           - type: file
             url: 'https://waf.io/waf-2.0.21'
             sha256: '7cebf2c5efe53cbb9a4b5bdc4b49ae90ecd64a8fce7a3222d58e591b58215306'
@@ -98,6 +91,7 @@ modules:
                   - sed -i 's|/usr/local|/app|' ./Makefile
 
           - name: nv-codec-headers
+            disabled: true
             cleanup:
               - '*'
             no-autogen: true
@@ -109,6 +103,7 @@ modules:
                 sha256: 'e5d1fe6b18254a3c8747a38714564030e4fda506961a11a7eafb94f2400419bb'
 
           - name: ffmpeg
+            disabled: true
             cleanup:
               - /include
               - /lib/pkgconfig
@@ -134,8 +129,8 @@ modules:
               - '--enable-libwebp'
             sources:
               - type: archive
-                url: 'https://ffmpeg.org/releases/ffmpeg-6.0.tar.xz'
-                sha256: '57be87c22d9b49c112b6d24bc67d42508660e6b718b3db89c44e47e289137082'
+                url: 'https://ffmpeg.org/releases/ffmpeg-6.1.tar.xz'
+                sha256: '488c76e57dd9b3bee901f71d5c95eaf1db4a5a31fe46a28654e837144207c270'
 
           - name: libass
             cleanup:
@@ -150,6 +145,7 @@ modules:
                 sha256: '9cbddee5e8c87e43a5fe627a19cd2aa4c36552156eb4edcf6c5a30bd4934fe58'
 
           - name: uchardet
+            disabled: true
             buildsystem: cmake-ninja
             config-opts:
               - '-DCMAKE_BUILD_TYPE=Release'
@@ -165,6 +161,7 @@ modules:
                 sha256: 'f3635d1d10e1470452bc42c1bf509451a9926b399a11740a9949e86069d69f58'
 
           - name: fribidi
+            disabled: true
             cleanup:
               - "/bin"
               - "/include"
@@ -177,6 +174,7 @@ modules:
                 sha256: 6a64f2a687f5c4f203a46fa659f43dd43d1f8b845df8d723107e8a7e6158e4ce
 
       - name: mplayer
+        disabled: true
         buildsystem: autotools
         build-options:
           arch:
@@ -187,6 +185,8 @@ modules:
           - --disable-gui
           - --disable-mencoder
           - --extra-libs-mplayer=-lrt
+          - --disable-libmpeg2-internal
+          - --disable-ffmpeg_a
           - --yasm=
         sources:
           - type: git
