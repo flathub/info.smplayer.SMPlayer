@@ -1,20 +1,27 @@
 app-id: info.smplayer.SMPlayer
 runtime: org.kde.Platform
-runtime-version: '5.15-24.08'
+runtime-version: 5.15-25.08
 sdk: org.kde.Sdk
 rename-desktop-file: smplayer.desktop
 rename-appdata-file: smplayer.appdata.xml
 rename-icon: smplayer
 command: smplayer
 finish-args:
-  - '--share=ipc'
-  - '--share=network'
-  - '--socket=x11'
-  - '--socket=pulseaudio'
-  - '--device=dri'
-  - '--filesystem=host'
-  - '--talk-name=org.freedesktop.ScreenSaver'
-  - '--own-name=org.mpris.MediaPlayer2.smplayer'
+  - --share=ipc
+  - --share=network
+  - --socket=x11
+  - --socket=pulseaudio
+  - --device=dri
+  - --filesystem=host
+  - --talk-name=org.freedesktop.ScreenSaver
+  - --own-name=org.mpris.MediaPlayer2.smplayer
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - '*.la'
+  - '*.a'
 
 modules:
   - name: smplayer
@@ -30,7 +37,7 @@ modules:
           env:
             QDEFOPTS: DEFINES+=NO_MPLAYER
     build-commands:
-      - make PREFIX=/app QMAKE_OPTS="$QDEFOPTS" -j$FLATPAK_BUILDER_N_JOBS install
+      - make PREFIX=/app QMAKE_OPTS=$QDEFOPTS -j$FLATPAK_BUILDER_N_JOBS install
       - install -Dm644 icons/smplayer.svg /app/share/icons/hicolor/scalable/apps/smplayer.svg
     sources:
       - type: git
@@ -41,12 +48,6 @@ modules:
 
     modules:
       - name: mpv
-        cleanup:
-          - /share/bash-completion
-          - /share/zsh
-          - /share/doc
-          - /share/icons
-          - /share/applications
         buildsystem: meson
         config-opts:
           - -Dlibmpv=false
@@ -55,30 +56,28 @@ modules:
           - -Dbuild-date=false
           - -Dalsa=disabled
           - -Dmanpage-build=disabled
+        cleanup:
+          - /share/applications
+          - /share/bash-completion
+          - /share/fish
+          - /share/icons
+          - /share/zsh
         sources:
           - type: archive
-            url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.40.0.tar.gz
-            sha256: 10a0f4654f62140a6dd4d380dcf0bbdbdcf6e697556863dc499c296182f081a3
+            url: https://github.com/mpv-player/mpv/archive/v0.41.0.tar.gz
+            sha256: ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209
 
         modules:
           - name: libass
-            cleanup:
-              - /include
-              - /lib/*.la
-              - /lib/pkgconfig
             config-opts:
-              - '--disable-static'
+              - --disable-static
             sources:
               - type: archive
-                url: 'https://github.com/libass/libass/releases/download/0.15.0/libass-0.15.0.tar.gz'
-                sha256: '9cbddee5e8c87e43a5fe627a19cd2aa4c36552156eb4edcf6c5a30bd4934fe58'
+                url: https://github.com/libass/libass/releases/download/0.17.4/libass-0.17.4.tar.xz
+                sha256: 78f1179b838d025e9c26e8fef33f8092f65611444ffa1bfc0cfac6a33511a05a
 
           - name: ffmpeg
             disabled: false
-            cleanup:
-              - /include
-              - /lib/pkgconfig
-              - /share/ffmpeg/examples
             config-opts:
               - --disable-debug
               - --disable-doc
@@ -109,18 +108,19 @@ modules:
               - --enable-vulkan
               - --enable-libdrm
               - --enable-vaapi
+            cleanup:
+              - /share/ffmpeg/examples
             sources:
               - type: archive
-                url: 'https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz'
-                sha256: '40973d44970dbc83ef302b0609f2e74982be2d85916dd2ee7472d30678a7abe6'
+                url: https://ffmpeg.org/releases/ffmpeg-7.1.3.tar.xz
+                sha256: f0bf043299db9e3caacb435a712fc541fbb07df613c4b893e8b77e67baf3adbe
 
           - name: libXpresent
             buildsystem: autotools
             sources:
-              - type: git
-                url: https://gitlab.freedesktop.org/xorg/lib/libxpresent.git
-                tag: libXpresent-1.0.1
-                commit: 37507b5f44332accfb1064ee69a4f6a833994747
+              - type: archive
+                url: https://xorg.freedesktop.org/archive/individual/lib/libXpresent-1.0.2.tar.xz
+                sha256: 4e5b21b4812206a4b223013606ae31170502c1043038777a1ef8f70c09d37602
 
           - name: libplacebo
             buildsystem: meson
@@ -129,8 +129,12 @@ modules:
               - -Ddemos=False
             sources:
               - type: archive
-                url: https://code.videolan.org/videolan/libplacebo/-/archive/v7.349.0/libplacebo-v7.349.0.tar.gz
-                sha256: 79120e685a1836344b51b13b6a5661622486a84e4d4a35f6c8d01679a20fbc86
+                url: https://code.videolan.org/videolan/libplacebo/-/archive/v7.360.1/libplacebo-v7.360.1.tar.gz
+                sha256: 14c0a99f4b01557ec9826ce6b1d52f6de21be274ba03fd5aab7307f18766dc39
+              - type: archive
+                url: https://github.com/pallets/markupsafe/archive/refs/tags/3.0.3.tar.gz
+                sha256: f1d9d06c34515dd3ad210ec769da613057b536d11d6c039183b87757a883a254
+                dest: 3rdparty/markupsafe
               - type: archive
                 url: https://github.com/pallets/jinja/archive/refs/tags/3.1.6.tar.gz
                 sha256: 2074b22a72caa65474902234b320d73463d6d4c223ee49f4b433495758356337
@@ -140,61 +144,29 @@ modules:
                 sha256: 44f06f9195427c7017f5028d0894f57eb216b0a8f7c4eda7ce883732aeb2d0fc
                 dest: 3rdparty/glad
 
-          - name: luajit
-            no-autogen: true
-            cleanup:
-              - /bin
-              - /lib/*.a
-              - /include
-              - /lib/pkgconfig
-              - /share/man
-            sources:
-              - type: git
-                url: https://github.com/LuaJIT/LuaJIT.git
-                disable-shallow-clone: true
-                commit: eec7a8016c3381b949b5d84583800d05897fa960
-              - type: shell
-                commands:
-                  - sed -i 's|/usr/local|/app|' ./Makefile
-
-          - name: nv-codec-headers
-            cleanup:
-              - '*'
-            no-autogen: true
-            make-install-args:
-              - PREFIX=/app
-            sources:
-              - type: archive
-                url: 'https://github.com/FFmpeg/nv-codec-headers/releases/download/n11.0.10.0/nv-codec-headers-11.0.10.0.tar.gz'
-                sha256: 'e5d1fe6b18254a3c8747a38714564030e4fda506961a11a7eafb94f2400419bb'
+          - shared-modules/luajit/luajit.json
 
           - name: uchardet
             buildsystem: cmake-ninja
             config-opts:
-              - '-DCMAKE_BUILD_TYPE=Release'
-              - '-DBUILD_STATIC=0'
+              - -DCMAKE_BUILD_TYPE=Release
+              - -DBUILD_STATIC=0
+              - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cleanup:
+              - /lib/cmake
               - /bin
-              - /include
-              - /lib/pkgconfig
-              - /share/man
             sources:
               - type: archive
-                url: 'https://gitlab.freedesktop.org/uchardet/uchardet/-/archive/v0.0.7/uchardet-v0.0.7.tar.gz'
-                sha256: 'f3635d1d10e1470452bc42c1bf509451a9926b399a11740a9949e86069d69f58'
+                url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz
+                sha256: e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0
 
           - name: fribidi
             cleanup:
-              - "/bin"
-              - "/include"
-              - "/lib/pkgconfig"
-              - "/lib/*.la"
-              - "/share/man"
+              - /bin
             sources:
               - type: archive
                 url: https://github.com/fribidi/fribidi/releases/download/v1.0.5/fribidi-1.0.5.tar.bz2
                 sha256: 6a64f2a687f5c4f203a46fa659f43dd43d1f8b845df8d723107e8a7e6158e4ce
-
 
       - name: mplayer
         disabled: true
