@@ -1,6 +1,6 @@
 app-id: info.smplayer.SMPlayer
 runtime: org.kde.Platform
-runtime-version: '5.15-24.08'
+runtime-version: '5.15-25.08'
 sdk: org.kde.Sdk
 rename-desktop-file: smplayer.desktop
 rename-appdata-file: smplayer.appdata.xml
